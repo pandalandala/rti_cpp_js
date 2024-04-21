@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<!--
+(c) 2005-2015 Copyright, Real-Time Innovations.  All rights reserved.
+No duplications, whole or partial, manual or electronic, may be made
+without express written permission.  Any such copies, or revisions thereof,
+must display this notice unaltered.
+This code contains trade secrets of Real-Time Innovations, Inc.
+ -->
+
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/current/rti_dds_profiles.xsd">
+
+    <!-- Qos Library -->
+    <qos_library name="QosLibrary">
+        <qos_profile name="DefaultProfile"
+                     base_name="BuiltinQosLibExp::Generic.StrictReliable"
+                     is_default_qos="true">
+            <domain_participant_qos>
+                <participant_name>
+                    <name>Connector Example</name>
+                </participant_name>
+            </domain_participant_qos>
+        </qos_profile>
+    </qos_library>
+
+    <!-- types -->
+    <types>
+<!--        <enum name="CommunicationType">-->
+<!--            <enumerator name="TCP"/>-->
+<!--            <enumerator name="UDP"/>-->
+<!--            <enumerator name="RS422"/>-->
+<!--            <enumerator name="RS485"/>-->
+<!--            <enumerator name="CAN"/>-->
+<!--        </enum>-->
+        <struct name= "HelloWorld">
+            <member name="device_id" type="int32"/>
+<!--            <member name="communication_type" type="nonBasic"  nonBasicTypeName= "CommunicationType"/>-->
+            <member name="device_name" stringMaxLength="255" type="string"/>
+            <member name="device_number" type="int32"/>
+            <member name="device_properties" stringMaxLength="255" type="string"/>
+            <member name="upper_linked_device_id" type="int32"/>
+            <member name="lower_linked_device_id" type="int32"/>
+        </struct>
+    </types>
+
+    <!-- Domain Library -->
+    <domain_library name="MyDomainLibrary">
+        <domain name="MyDomain" domain_id="0">
+            <register_type name="HelloWorld" type_ref="HelloWorld" />
+            <topic name="HelloWorld" register_type_ref="HelloWorld"/>
+        </domain>
+    </domain_library>
+
+    <!-- Participant library -->
+    <domain_participant_library name="MyParticipantLibrary">
+        <domain_participant name="MyPubParticipant" domain_ref="MyDomainLibrary::MyDomain">
+            <publisher name="MyPublisher">
+                <data_writer name="MyWriter" topic_ref="HelloWorld" />
+            </publisher>
+        </domain_participant>
+
+        <!-- We use separate participants because we run the writer and the reader
+            on different applications, and wouldn't want to create the reader
+            in writer.py, or the writer in reader.py -->
+        <domain_participant name="MySubParticipant" domain_ref="MyDomainLibrary::MyDomain">
+            <subscriber name="MySubscriber">
+                <data_reader name="MyReader" topic_ref="HelloWorld" />
+            </subscriber>
+        </domain_participant>
+
+        <!-- You can also define the reader and writer inside the same
+            connector instance if you plan to use both in the same application.
+        -->
+<!--        <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">-->
+<!--            <publisher name="MyPublisher">-->
+<!--                <data_writer name="MySquareWriter" topic_ref="Square" />-->
+<!--            </publisher>-->
+<!--            <subscriber name="MySubscriber">-->
+<!--                &lt;!&ndash; Uncomment this if you don't want the Input to start receiving-->
+<!--                    data before you call Connector.get_input()-->
+<!--                &ndash;&gt;-->
+<!--                &lt;!&ndash;-->
+<!--                <subscriber_qos>-->
+<!--                    <entity_factory>-->
+<!--                        <autoenable_created_entities>false</autoenable_created_entities>-->
+<!--                    </entity_factory>-->
+<!--                </subscriber_qos>-->
+<!--                &ndash;&gt;-->
+<!--                <data_reader name="MySquareReader" topic_ref="Square" />-->
+<!--            </subscriber>-->
+<!--        </domain_participant>-->
+
+        <!-- The transform.py script reads Squares and writes Circles -->
+<!--        <domain_participant name="TransformationParticipant" domain_ref="MyDomainLibrary::MyDomain">-->
+<!--            <subscriber name="MySubscriber">-->
+<!--                <data_reader name="MySquareReader" topic_ref="Square" />-->
+<!--            </subscriber>-->
+<!--            <publisher name="MyPublisher">-->
+<!--                <data_writer name="MyCircleWriter" topic_ref="Circle" />-->
+<!--            </publisher>-->
+<!--        </domain_participant>-->
+
+<!--        <domain_participant name="CircleSubParticipant" domain_ref="MyDomainLibrary::MyDomain">-->
+<!--            <subscriber name="MySubscriber">-->
+<!--                <data_reader name="MyCircleReader" topic_ref="Circle" />-->
+<!--            </subscriber>-->
+<!--        </domain_participant>-->
+    </domain_participant_library>
+</dds>
